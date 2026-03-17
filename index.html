@@ -171,7 +171,8 @@
 
             tableBody.innerHTML = ""; 
 
-            if(status === "promoted") {
+            if (status?.toUpperCase() === "PROMOTED") {
+
                 // Handle Promoted Status
                 rankContainer.classList.add('hidden');
                 tableHead.classList.add('hidden');
