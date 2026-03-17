@@ -203,11 +203,11 @@
                     const scoreClass = isSubFailed ? 'text-red-600 font-black' : 'text-gray-800 font-bold';
 
                     tableBody.innerHTML += `
-                        <tr class="border-b border-gray-50 ${rowClass}">
-                            <td class="py-4 px-2 text-[10px] text-gray-400">${index + 1}</td>
-                            <td class="py-4 font-bold text-gray-700">${m.subject}</td>
-                            <td class="py-4 text-center text-gray-400 text-xs">${m.max || '100'}</td>
-                            <td class="py-4 text-right ${scoreClass}">${m.score}</td>
+                        <tr class="border-b border-gray-950 ${rowClass}">
+                            <td class="py-1 px-2 text-[10px] text-gray-400">${index + 1}</td>
+                            <td class="py-1 font-bold ">${m.subject}</td>
+                            <td class="py-1 text-center text-xs">${m.max || '100'}</td>
+                            <td class="py-1 text-right ${scoreClass}">${m.score}</td>
                         </tr>`;
                 });
 
