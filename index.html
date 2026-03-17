@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Madrassa Result Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .fail-row { background-color: #fef2f2 !important; } 
+        /* tabular-nums keeps marks aligned vertically */
+        .marks-font { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen">
+
+    <main class="max-w-2xl mx-auto py-10 px-4">
+        
+        <div id="searchSession" class="bg-white p-6 sm:p-8 rounded-2xl shadow-xl border border-gray-100">
+            <div class="text-center mb-8">
+                <img id="loginLogo" src="logo.png" alt="Madrassa Emblem" class="mx-auto h-20 sm:h-24 mb-6"> 
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-emerald-800 tracking-tight">MADRASSA NAME</h1>
+                <p class="text-xs sm:text-sm text-gray-500">place, Kerala | Result Portal 2025-26</p>
+            </div>
+
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1 ml-1">Admission Number</label>
+                    <input type="text" id="adNo" placeholder="Enter Ad No." class="w-full p-4 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none transition-all">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase mb-1 ml-1">Select Class</label>
+                    <select id="className" class="w-full p-4 border-2 border-gray-100 rounded-xl focus:border-emerald-500 outline-none cursor-pointer">
+                        <option value="1">Class 1</option>
+                        <option value="2">Class 2</option>
+                        <option value="3">Class 3</option>
+                    </select>
+                </div>
+                <button onclick="fetchResult()" id="searchBtn" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl hover:bg-emerald-700 active:scale-[0.98] transition-all shadow-lg">
+                    VIEW STUDENT RECORD
+                </button>
+            </div>
+        </div>
+
+        <div id="resultWrapper" class="hidden animate-in fade-in duration-500">
+            <div id="resultCard" class="bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-200">
+                
+                <div class="bg-emerald-800 text-white p-6 text-center">
+                    <img id="resultLogo" src="logo.png" alt="Madrassa Emblem" class="mx-auto h-16 mb-3">
+                    <h2 class="text-xl sm:text-2xl font-bold">NAME OF  MADRASSA</h2>
+                    <p class="text-[10px] opacity-80 uppercase tracking-widest">PLACE , PLACE 2, Kerala - 676542</p>
+                    <div class="mt-3 inline-block bg-white/20 px-4 py-1 rounded-full text-[10px] sm:text-xs">ANNUAL RESULTS : 2025 - 2026</div>
+                </div>
+
+                <div class="p-5 sm:p-8">
+                    <div class="grid grid-cols-2 gap-y-5 gap-x-4 mb-6 text-sm">
+                        <div class="col-span-2 border-b border-gray-100 pb-2">
+                            <p class="text-gray-400 uppercase text-[10px] font-bold">Student Name</p>
+                            <p id="resName" class="font-extrabold text-gray-800 text-lg sm:text-xl"></p>
+                        </div>
+
+                        <div>
+                            <p class="text-gray-400 uppercase text-[10px] font-bold">Admission No</p>
+                            <p id="resAdNo" class="font-bold text-gray-800 text-base"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 uppercase text-[10px] font-bold">Class & Division</p>
+                            <p class="font-bold text-gray-800 text-base">Class <span id="resClass"></span></p>
+                        </div>
+
+                        <div>
+                            <p class="text-gray-400 uppercase text-[10px] font-bold">Attendance</p>
+                            <p id="resAtt" class="font-bold text-emerald-600 text-base"></p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-gray-400 uppercase text-[10px] font-bold">Class Rank</p>
+                            <p id="resRankValue" class="font-bold text-gray-800 text-base"></p>
+                        </div>
+
+                        <div class="col-span-2 bg-slate-50 p-4 rounded-xl text-center border border-gray-100">
+                            <p class="text-gray-400 uppercase text-[10px] font-bold mb-1">Result Status</p>
+                            <p id="resStatusText" class="font-black text-lg sm:text-xl"></p>
+                        </div>
+                    </div>
+
+                    <table class="w-full text-left mb-6 marks-font">
+                        <thead>
+                            <tr class="text-[10px] uppercase tracking-widest text-gray-400 border-b">
+                                <th class="py-3 px-2">Sl</th>
+                                <th class="py-3">Subject</th>
+                                <th class="py-3 text-center">Max</th>
+                                <th class="py-3 text-right">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="marksTableBody" class="text-xs sm:text-sm text-gray-700 font-semibold">
+                            </tbody>
+                    </table>
+
+                    <div class="flex items-center justify-between mt-8 pt-6 border-t border-dashed">
+                        <div>
+                            <p class="text-[9px] text-gray-400 uppercase font-bold">Final Verdict</p>
+                            <div id="statusBadge" class="text-lg sm:text-xl font-black"></div>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[9px] text-gray-400 uppercase font-bold">Issued By</p>
+                            <p class="text-xs font-bold text-gray-800">Office of MADRASSA NAME</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row gap-3 mt-8">
+                <button onclick="window.location.reload()" class="flex-1 bg-slate-200 text-slate-700 py-3 rounded-xl font-bold hover:bg-slate-300 transition">BACK TO SEARCH</button>
+                <button onclick="downloadImage()" class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-bold hover:bg-blue-700 shadow-lg shadow-blue-200 transition">DOWNLOAD PNG</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_krplMQiFJH9IqNndstJTf0hU8iCUmrz1i75Lrd9AGWpuaOIQ-INugoBRY4v3S1S6/exec";
+        const sheetId = "1vAlULhvfWd1KBin0MynJMVKgJb9kr4aoJcCgYldhrFs";
+
+        async function fetchResult() {
+            const adNo = document.getElementById('adNo').value;
+            const className = document.getElementById('className').value;
+            const btn = document.getElementById('searchBtn');
+
+            if(!adNo) return alert("Please enter Admission Number");
+
+            btn.disabled = true;
+            btn.innerHTML = `<span class="inline-block animate-pulse">PROCESSING...</span>`;
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?sheetid=${sheetId}&adno=${adNo}&className=${className}`);
+                const data = await response.json();
+
+                if(data.error) {
+                    alert(data.error);
+                    btn.disabled = false;
+                    btn.innerText = "VIEW STUDENT RECORD";
+                } else {
+                    document.getElementById('searchSession').classList.add('hidden');
+                    displayResult(data, className);
+                }
+            } catch (err) {
+                alert("Connection failed. Please check internet.");
+                btn.disabled = false;
+                btn.innerText = "VIEW STUDENT RECORD";
+            }
+        }
+
+        function displayResult(data, className) {
+            document.getElementById('resultWrapper').classList.remove('hidden');
+            
+            // Name to Uppercase
+            document.getElementById('resName').innerText = (data.details.Name || "Unknown").toUpperCase();
+            document.getElementById('resAdNo').innerText = data.details.AdNo || "---";
+            document.getElementById('resClass').innerText = className;
+            document.getElementById('resAtt').innerText = data.details.Attendance || "0";
+
+            const isPassed = data.isPassed;
+            
+            // Status Grid Field
+            const statusText = document.getElementById('resStatusText');
+            statusText.innerText = isPassed ? "PASSED" : "FAILED";
+            statusText.className = isPassed ? "font-black text-lg sm:text-xl text-emerald-600" : "font-black text-lg sm:text-xl text-red-600";
+
+            // Rank Field
+            const rankValue = document.getElementById('resRankValue');
+            if (isPassed && data.details.Rank) {
+                rankValue.innerText = "#" + data.details.Rank;
+                rankValue.classList.replace('text-gray-400', 'text-gray-800');
+            } else {
+                rankValue.innerText = "Nil";
+                rankValue.classList.replace('text-gray-800', 'text-gray-400');
+            }
+
+            // Table
+            const tableBody = document.getElementById('marksTableBody');
+            tableBody.innerHTML = ""; 
+            
+            data.marks.forEach((m, index) => {
+                const isSubjectFailed = m.status !== 'Pass';
+                const rowClass = isSubjectFailed ? 'fail-row' : '';
+                const scoreClass = isSubjectFailed ? 'text-red-600' : 'text-gray-800';
+
+                tableBody.innerHTML += `
+                    <tr class="border-b border-gray-50 transition-colors ${rowClass}">
+                        <td class="py-4 px-2 text-[10px] text-gray-400 font-normal">${index + 1}</td>
+                        <td class="py-4 font-bold text-gray-700">${m.subject}</td>
+                        <td class="py-4 text-center text-gray-800 font-normal">${m.max || 'N/A'}</td>
+                        <td class="py-4 text-right font-black ${scoreClass}">${m.score}</td>
+                    </tr>`;
+            });
+
+            // Badge Footer
+            const badge = document.getElementById('statusBadge');
+            badge.innerText = isPassed ? "PASSED SUCCESSFULLY" : "FAILED";
+            badge.className = isPassed ? "text-lg sm:text-xl font-black text-emerald-600" : "text-lg sm:text-xl font-black text-red-600";
+        }
+
+        function downloadImage() {
+            const card = document.querySelector("#resultCard");
+            const originalStyle = card.style.cssText;
+
+            // Prepare for PNG capture: Force a high-quality width
+            card.style.width = "600px"; 
+            card.style.minWidth = "500px";
+            window.scrollTo(0, 0);
+
+            html2canvas(card, {
+                scale: 3, 
+                useCORS: true,
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                card.style.cssText = originalStyle; // Return to responsive mobile view
+                
+                const adNo = document.getElementById('resAdNo').innerText;
+                const link = document.createElement('a');
+                link.download = `Result_AdNo_${adNo}.png`;
+                link.href = canvas.toDataURL("image/png", 1.0);
+                link.click();
+            });
+        }
+    </script>
+</body>
+</html>
